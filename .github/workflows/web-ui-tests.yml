@@ -31,7 +31,8 @@ jobs:
           cache: gradle
 
       - name: Run Cucumber tests
-        run: ./gradlew clean test --no-daemon
+        run: bash ./gradlew clean test --no-daemon
+
 
       - name: Upload Cucumber reports
         if: always()
