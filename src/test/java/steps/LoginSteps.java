@@ -7,6 +7,7 @@ import io.cucumber.java.en.Then;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 
 import org.junit.Assert;
 
@@ -19,10 +20,19 @@ public class LoginSteps {
 
     @Given("user is on login page")
     public void userIsOnLoginPage() {
-        driver = new ChromeDriver();
+        ChromeOptions options = new ChromeOptions();
+
+        if ("true".equalsIgnoreCase(System.getenv("CI"))) {
+            options.addArguments("--headless=new");
+            options.addArguments("--no-sandbox");
+            options.addArguments("--disable-dev-shm-usage");
+        }
+
+        driver = new ChromeDriver(options);
         loginPage = new LoginPage(driver);
         loginPage.openLoginPage();
     }
+
 
     @When("user input username with {string}")
     public void userInputUsernameWith(String username) {
