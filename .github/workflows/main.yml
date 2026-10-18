@@ -1,0 +1,81 @@
+name: API and Web UI Automation Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  web-ui-tests:
+    name: Run Selenium and Cucumber Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      CI: "true"
+
+    steps:
+      - name: Checkout Web UI repository
+        uses: actions/checkout@v7
+
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Run Cucumber tests
+        run: bash ./gradlew clean test --no-daemon
+
+      - name: Upload Cucumber reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: cucumber-test-reports
+          path: |
+            reports/cucumber-report.html
+            reports/cucumber-report.json
+            build/reports/tests/test/
+          if-no-files-found: warn
+          retention-days: 14
+
+  api-tests:
+    name: Run API Automation Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout API Automation repository
+        uses: actions/checkout@v7
+        with:
+          repository: msnurfatih/api-automation-test
+          ref: main
+          path: api-automation-test
+
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Run API Automation tests
+        working-directory: api-automation-test
+        run: bash ./gradlew clean test --no-daemon
+
+      - name: Upload API test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: api-test-reports
+          path: |
+            api-automation-test/build/reports/tests/test/
+            api-automation-test/build/test-results/test/
+          if-no-files-found: warn
+          retention-days: 14
